@@ -1,0 +1,13 @@
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.jsonl
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+node_modules/

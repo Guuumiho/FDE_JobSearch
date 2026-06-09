@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "JD Capture MVP",
+  "version": "0.1.0",
+  "description": "Capture visible job page text and download it as a local text file.",
+  "permissions": [
+    "downloads",
+    "activeTab",
+    "https://www.zhipin.com/*",
+    "https://m.zhipin.com/*",
+    "http://127.0.0.1:8765/*",
+    "http://localhost:8765/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.zhipin.com/*",
+        "https://m.zhipin.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "jd-capture-mvp@example.local"
+    }
+  }
+}

@@ -1,0 +1,666 @@
+:root {
+  --bg: #ffffff;
+  --soft: #f7f7f7;
+  --card: #ffffff;
+  --text: #202124;
+  --muted: #777b82;
+  --line: #eeeeee;
+  --red: #ff2442;
+  --red-dark: #e31736;
+  --shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
+  --sidebar: 204px;
+  --card-width: 236px;
+  --gap: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body[data-theme="glass1"] {
+  --bg: #cfc2c0;
+  --card: rgba(255, 255, 255, 0.2);
+  --text: #eef7f8;
+  --muted: rgba(228, 247, 249, 0.72);
+  --line: rgba(255, 255, 255, 0.24);
+  --red: #b9e1e9;
+  --red-dark: #a6c3e1;
+  --shadow: 0 26px 70px rgba(45, 90, 122, 0.26);
+  --glass-cream: #e4e7d3;
+  --glass-sand: #e6cebf;
+  --glass-blue: #a6c3e1;
+  --glass-cyan: #b9e1e9;
+  --glass-ink: #2d5a7a;
+  background:
+    radial-gradient(circle at 82% 42%, rgba(185, 225, 233, 0.62) 0 8%, transparent 17%),
+    radial-gradient(circle at 16% 76%, rgba(230, 206, 191, 0.42) 0 10%, transparent 21%),
+    linear-gradient(180deg, rgba(166, 195, 225, 0.5), rgba(228, 231, 211, 0.36)),
+    linear-gradient(135deg, #a6c3e1 0%, #b9e1e9 42%, #e6cebf 100%);
+  background-attachment: fixed;
+}
+
+body[data-theme="glass1"]::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  content: "";
+  background:
+    radial-gradient(ellipse at 24% 42%, rgba(45, 90, 122, 0.36) 0 8%, transparent 18%),
+    radial-gradient(ellipse at 70% 54%, rgba(166, 195, 225, 0.34) 0 11%, transparent 25%),
+    linear-gradient(120deg, transparent 0 30%, rgba(228, 231, 211, 0.28) 46%, transparent 63%);
+  filter: blur(1px);
+}
+
+body[data-theme="glass1"]::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background: rgba(45, 90, 122, 0.13);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar);
+  border-right: 1px solid #f5f5f5;
+  background: #fff;
+  padding: 36px 20px 22px;
+}
+
+.logo {
+  display: inline-grid;
+  min-width: 92px;
+  height: 44px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.nav-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 140px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 60px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 22px;
+  background: transparent;
+  color: #333;
+  font-size: 19px;
+  font-weight: 850;
+  cursor: default;
+}
+
+.nav-item.active {
+  background: #f5f5f5;
+}
+
+.nav-icon {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.side-footer {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  left: 20px;
+}
+
+.settings-panel {
+  display: none;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: #fff;
+}
+
+.settings-panel.open {
+  display: block;
+}
+
+.settings-title {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.style-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.style-option {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.style-option.active {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
+.capture-button {
+  width: 100%;
+  height: 60px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.capture-button:hover {
+  background: var(--red-dark);
+}
+
+.side-footer p {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.main {
+  min-height: 100vh;
+  margin-left: var(--sidebar);
+  overflow-x: auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  min-width: calc(var(--card-width) * 5 + var(--gap) * 4 + 90px);
+  padding: 40px 0 32px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+}
+
+.search-wrap {
+  position: relative;
+  width: min(1150px, calc(100vw - var(--sidebar) - 160px));
+  min-width: 720px;
+}
+
+.search-wrap input {
+  width: 100%;
+  height: 70px;
+  border: 1px solid #d9d9d9;
+  border-radius: 999px;
+  padding: 0 80px 0 30px;
+  background: #fff;
+  color: #333;
+  font-size: 18px;
+  outline: none;
+  box-shadow: 0 12px 36px rgba(15, 15, 15, 0.06);
+}
+
+.search-wrap input:focus {
+  border-color: #c8c8c8;
+  box-shadow: 0 12px 36px rgba(15, 15, 15, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #ededed;
+  color: #aaa;
+  font-size: 28px;
+}
+
+.gallery-shell {
+  width: calc(var(--card-width) * 5 + var(--gap) * 4);
+  margin: 0 auto;
+  padding: 0 0 72px;
+}
+
+.status {
+  padding: 80px 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, var(--card-width));
+  gap: 26px var(--gap);
+  align-items: start;
+}
+
+.job-card {
+  width: var(--card-width);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.card-cover {
+  display: flex;
+  min-height: 146px;
+  max-height: 176px;
+  padding: 18px 18px 16px;
+  color: #1f2f46;
+  background: linear-gradient(135deg, #d4f6e4 0%, #bdf1d7 100%);
+}
+
+.job-card:nth-child(5n + 2) .card-cover {
+  background: linear-gradient(135deg, #d9e9ff 0%, #c9ddfb 100%);
+}
+
+.job-card:nth-child(5n + 3) .card-cover {
+  background: linear-gradient(135deg, #d4f6e4 0%, #c8efd8 100%);
+}
+
+.job-card:nth-child(5n + 4) .card-cover {
+  background: linear-gradient(135deg, #efe3ff 0%, #e6d7ff 100%);
+}
+
+.job-card:nth-child(5n) .card-cover {
+  background: linear-gradient(135deg, #ffe4e9 0%, #ffd8e0 100%);
+}
+
+.cover-content {
+  align-self: flex-end;
+  min-width: 0;
+}
+
+.salary {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgba(255, 255, 255, 0.56);
+  color: #324761;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-card h2 {
+  display: -webkit-box;
+  margin: 10px 0 0;
+  overflow: hidden;
+  font-size: 21px;
+  line-height: 1.22;
+  letter-spacing: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.card-body {
+  padding: 14px 14px 13px;
+}
+
+.company {
+  display: -webkit-box;
+  min-height: 40px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 760;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.desc {
+  display: -webkit-box;
+  height: 84px;
+  margin: 0 0 12px;
+  overflow: hidden;
+  color: #4c4f55;
+  font-size: 13px;
+  line-height: 1.62;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.location {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  flex: 0 0 auto;
+}
+
+dialog {
+  width: min(920px, calc(100vw - 48px));
+  border: 0;
+  border-radius: 20px;
+  padding: 0;
+  background: transparent;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.detail-panel {
+  position: relative;
+  max-height: calc(100vh - 64px);
+  overflow: auto;
+  border-radius: 20px;
+  background: #fff;
+  padding: 30px;
+}
+
+.close-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #f3f3f3;
+  color: #555;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.detail-header {
+  max-width: 760px;
+  padding-right: 52px;
+}
+
+.detail-header h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+  line-height: 1.22;
+}
+
+.detail-subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-weight: 720;
+}
+
+.detail-section {
+  margin-top: 24px;
+}
+
+.detail-section h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.detail-section p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #30343a;
+  font-size: 15px;
+  line-height: 1.82;
+}
+
+.open-link {
+  color: var(--red);
+  font-weight: 820;
+  text-decoration: none;
+}
+
+@media (max-width: 1500px) {
+  :root {
+    --card-width: 220px;
+    --gap: 18px;
+  }
+}
+
+body[data-theme="glass1"] .sidebar,
+body[data-theme="glass1"] .topbar {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(26px) saturate(120%);
+}
+
+body[data-theme="glass1"] .topbar {
+  box-shadow: 0 16px 44px rgba(38, 29, 28, 0.08);
+}
+
+body[data-theme="glass1"] .logo,
+body[data-theme="glass1"] .capture-button,
+body[data-theme="glass1"] .style-option.active {
+  background: rgba(185, 225, 233, 0.68);
+  color: var(--glass-ink);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    0 14px 34px rgba(45, 90, 122, 0.18);
+}
+
+body[data-theme="glass1"] .nav-item {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+body[data-theme="glass1"] .nav-item.active,
+body[data-theme="glass1"] .nav-item:hover,
+body[data-theme="glass1"] .settings-panel {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(228, 231, 211, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 18px 42px rgba(45, 90, 122, 0.14);
+  backdrop-filter: blur(24px) saturate(115%);
+}
+
+body[data-theme="glass1"] .style-option {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(166, 195, 225, 0.14);
+  color: rgba(245, 253, 252, 0.86);
+}
+
+body[data-theme="glass1"] .search-wrap input {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(228, 231, 211, 0.18);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.28),
+    0 24px 70px rgba(45, 90, 122, 0.19);
+  backdrop-filter: blur(28px) saturate(120%);
+}
+
+body[data-theme="glass1"] .search-wrap input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+body[data-theme="glass1"] .search-icon {
+  background: rgba(185, 225, 233, 0.22);
+  color: rgba(255, 255, 255, 0.76);
+}
+
+body[data-theme="glass1"] .job-card {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(228, 231, 211, 0.22), rgba(166, 195, 225, 0.09)),
+    rgba(45, 90, 122, 0.14);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.34),
+    inset 0 -24px 42px rgba(45, 90, 122, 0.12),
+    0 24px 60px rgba(45, 90, 122, 0.23);
+  backdrop-filter: blur(24px) saturate(120%);
+}
+
+body[data-theme="glass1"] .job-card::before {
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  content: "";
+  border-radius: 27px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 35%),
+    radial-gradient(circle at 78% 20%, rgba(185, 225, 233, 0.28), transparent 24%);
+}
+
+body[data-theme="glass1"] .job-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.38),
+    inset 0 -24px 42px rgba(45, 90, 122, 0.18),
+    0 34px 76px rgba(45, 90, 122, 0.32);
+}
+
+body[data-theme="glass1"] .card-cover {
+  min-height: 156px;
+  border-radius: 26px 26px 34px 34px;
+  background:
+    radial-gradient(circle at 75% 28%, rgba(228, 231, 211, 0.58) 0 18%, transparent 30%),
+    linear-gradient(145deg, rgba(45, 90, 122, 0.58), rgba(230, 206, 191, 0.28));
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -34px 46px rgba(45, 90, 122, 0.18);
+}
+
+body[data-theme="glass1"] .job-card:nth-child(5n + 2) .card-cover {
+  background:
+    radial-gradient(circle at 76% 28%, rgba(185, 225, 233, 0.5) 0 18%, transparent 31%),
+    linear-gradient(145deg, rgba(45, 90, 122, 0.54), rgba(166, 195, 225, 0.3));
+}
+
+body[data-theme="glass1"] .job-card:nth-child(5n + 3) .card-cover {
+  background:
+    radial-gradient(circle at 76% 30%, rgba(166, 195, 225, 0.44) 0 17%, transparent 31%),
+    linear-gradient(145deg, rgba(45, 90, 122, 0.64), rgba(228, 231, 211, 0.22));
+}
+
+body[data-theme="glass1"] .job-card:nth-child(5n + 4) .card-cover {
+  background:
+    radial-gradient(circle at 76% 28%, rgba(228, 231, 211, 0.5) 0 18%, transparent 31%),
+    linear-gradient(145deg, rgba(93, 122, 124, 0.5), rgba(185, 225, 233, 0.28));
+}
+
+body[data-theme="glass1"] .job-card:nth-child(5n) .card-cover {
+  background:
+    radial-gradient(circle at 76% 28%, rgba(230, 206, 191, 0.52) 0 18%, transparent 31%),
+    linear-gradient(145deg, rgba(74, 103, 126, 0.52), rgba(230, 206, 191, 0.28));
+}
+
+body[data-theme="glass1"] .salary {
+  background: rgba(255, 255, 255, 0.17);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+body[data-theme="glass1"] .card-body {
+  position: relative;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body[data-theme="glass1"] .company {
+  color: rgba(255, 255, 255, 0.96);
+}
+
+body[data-theme="glass1"] .desc {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+body[data-theme="glass1"] .card-meta,
+body[data-theme="glass1"] .side-footer p,
+body[data-theme="glass1"] .status,
+body[data-theme="glass1"] .settings-title {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+body[data-theme="glass1"] dialog::backdrop {
+  background: rgba(45, 90, 122, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+body[data-theme="glass1"] .detail-panel {
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background:
+    linear-gradient(180deg, rgba(228, 231, 211, 0.28), rgba(166, 195, 225, 0.12)),
+    rgba(45, 90, 122, 0.42);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.34),
+    0 30px 90px rgba(45, 90, 122, 0.34);
+  backdrop-filter: blur(30px) saturate(120%);
+}
+
+body[data-theme="glass1"] .detail-subtitle,
+body[data-theme="glass1"] .detail-section p {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+body[data-theme="glass1"] .close-button {
+  background: rgba(185, 225, 233, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body[data-theme="glass1"] .open-link {
+  color: #e4e7d3;
+}
