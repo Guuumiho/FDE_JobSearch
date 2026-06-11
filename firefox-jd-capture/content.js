@@ -42,8 +42,7 @@
     setButtonState(saveButton, "整理中", true);
 
     try {
-      const job = collectJobInfo();
-      await browser.runtime.sendMessage({ type: "saveJobToLocal", job });
+      await saveCurrentJobToLocal();
       saveButton.textContent = "已保存";
     } catch (error) {
       console.error("[JD Capture MVP]", error);
@@ -91,6 +90,12 @@ function setButtonState(button, text, disabled) {
   button.style.opacity = disabled ? "0.75" : "1";
 }
 
+async function saveCurrentJobToLocal() {
+  const job = collectJobInfo();
+  await browser.runtime.sendMessage({ type: "saveJobToLocal", job });
+  return job;
+}
+
 async function runOpenDetailAction(button) {
   window.__jdCaptureAutomationStopped = false;
   setButtonState(button, "执行中", true);
@@ -100,14 +105,21 @@ async function runOpenDetailAction(button) {
     if (window.__jdCaptureAutomationStopped) {
       setButtonState(button, "已停止", false);
     } else {
-      setButtonState(button, clicked ? "已点击" : "未找到", false);
+      setButtonState(button, clicked ? "保存中" : "未找到 保存", true);
+      await sleep(clicked ? 900 : 250);
+      if (window.__jdCaptureAutomationStopped) {
+        setButtonState(button, "已停止", false);
+        return;
+      }
+      await saveCurrentJobToLocal();
+      setButtonState(button, "已保存", false);
     }
   } catch (error) {
-    console.error("[JD Capture MVP] open detail action failed", error);
+    console.error("[JD Capture MVP] open detail/save action failed", error);
     setButtonState(button, "失败", false);
-    alert(`打开详情动作失败：${error.message || error}`);
+    alert(`开始动作失败：${error.message || error}\n\n请确认本地服务已启动：http://127.0.0.1:8765`);
   } finally {
-    setTimeout(() => setButtonState(button, "开始", false), 1400);
+    setTimeout(() => setButtonState(button, "开始", false), 1600);
   }
 }
 
