@@ -1,61 +1,219 @@
 (function initJdCapture() {
   if (window.__jdCaptureMvpLoaded) return;
   window.__jdCaptureMvpLoaded = true;
+  window.__jdCaptureAutomationStopped = false;
 
-  const button = document.createElement("button");
-  button.id = "jd-capture-mvp-button";
-  button.type = "button";
-  button.textContent = "保存JD";
-  button.title = "抓取当前页面可见岗位文字并下载";
-  button.setAttribute("aria-label", "保存当前岗位信息");
-
-  Object.assign(button.style, {
+  const panel = document.createElement("div");
+  panel.id = "jd-capture-mvp-panel";
+  Object.assign(panel.style, {
     position: "fixed",
     right: "22px",
     bottom: "92px",
     zIndex: "2147483647",
-    minWidth: "96px",
-    height: "42px",
+    display: "grid",
+    gap: "8px",
+    width: "106px",
+    font: "700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+  });
+
+  const startButton = createFloatingButton("开始", "#2563eb");
+  startButton.title = "在右侧详情页查找并点击查看更多信息";
+  startButton.setAttribute("aria-label", "开始打开详情动作");
+
+  const stopButton = createFloatingButton("停止", "#475569");
+  stopButton.title = "停止当前执行";
+  stopButton.setAttribute("aria-label", "停止执行");
+
+  const saveButton = createFloatingButton("保存JD", "#e94853");
+  saveButton.id = "jd-capture-mvp-button";
+  saveButton.title = "抓取当前页面岗位信息并保存到本地服务";
+  saveButton.setAttribute("aria-label", "保存当前岗位信息");
+
+  startButton.addEventListener("click", () => runOpenDetailAction(startButton));
+
+  stopButton.addEventListener("click", () => {
+    window.__jdCaptureAutomationStopped = true;
+    setButtonState(startButton, "已停止", false);
+    setTimeout(() => setButtonState(startButton, "开始", false), 1000);
+  });
+
+  saveButton.addEventListener("click", async () => {
+    const originalText = saveButton.textContent;
+    setButtonState(saveButton, "整理中", true);
+
+    try {
+      const job = collectJobInfo();
+      await browser.runtime.sendMessage({ type: "saveJobToLocal", job });
+      saveButton.textContent = "已保存";
+    } catch (error) {
+      console.error("[JD Capture MVP]", error);
+      saveButton.textContent = "失败";
+      alert(`保存失败：${error.message || error}\n\n请确认本地服务已启动：http://127.0.0.1:8765`);
+    } finally {
+      setTimeout(() => setButtonState(saveButton, originalText, false), 1600);
+    }
+  });
+
+  panel.appendChild(startButton);
+  panel.appendChild(stopButton);
+  panel.appendChild(saveButton);
+  document.documentElement.appendChild(panel);
+})();
+
+function createFloatingButton(text, background) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = text;
+  button.dataset.bg = background;
+  Object.assign(button.style, {
+    width: "106px",
+    height: "40px",
     border: "0",
     borderRadius: "999px",
-    background: "#e94853",
+    background,
     color: "#ffffff",
     boxShadow: "0 10px 28px rgba(0, 0, 0, 0.22)",
     cursor: "pointer",
     font: "700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
   });
-
   button.addEventListener("mouseenter", () => {
-    button.style.background = "#c92d3b";
+    button.style.filter = "brightness(0.92)";
   });
-
   button.addEventListener("mouseleave", () => {
-    button.style.background = "#e94853";
+    button.style.filter = "none";
   });
+  return button;
+}
 
-  button.addEventListener("click", async () => {
-    const originalText = button.textContent;
-    button.textContent = "整理中";
-    button.disabled = true;
+function setButtonState(button, text, disabled) {
+  button.textContent = text;
+  button.disabled = disabled;
+  button.style.opacity = disabled ? "0.75" : "1";
+}
 
-    try {
-      const job = collectJobInfo();
-      await browser.runtime.sendMessage({ type: "saveJobToLocal", job });
-      button.textContent = "已保存";
-    } catch (error) {
-      console.error("[JD Capture MVP]", error);
-      button.textContent = "失败";
-      alert(`保存失败：${error.message || error}\n\n请确认本地服务已启动：http://127.0.0.1:8765`);
-    } finally {
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.disabled = false;
-      }, 1600);
+async function runOpenDetailAction(button) {
+  window.__jdCaptureAutomationStopped = false;
+  setButtonState(button, "执行中", true);
+
+  try {
+    const clicked = await openMoreInfoInDetailPane();
+    if (window.__jdCaptureAutomationStopped) {
+      setButtonState(button, "已停止", false);
+    } else {
+      setButtonState(button, clicked ? "已点击" : "未找到", false);
     }
-  });
+  } catch (error) {
+    console.error("[JD Capture MVP] open detail action failed", error);
+    setButtonState(button, "失败", false);
+    alert(`打开详情动作失败：${error.message || error}`);
+  } finally {
+    setTimeout(() => setButtonState(button, "开始", false), 1400);
+  }
+}
 
-  document.documentElement.appendChild(button);
-})();
+async function openMoreInfoInDetailPane() {
+  const detailPane = findDetailScrollPane();
+  if (!detailPane) {
+    throw new Error("没有找到右侧岗位详情滚动区域，请先点击一个岗位打开详情页。");
+  }
+
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    if (window.__jdCaptureAutomationStopped) return false;
+
+    const moreButton = findMoreInfoButton(detailPane);
+    if (moreButton) {
+      moreButton.scrollIntoView({ block: "center", inline: "nearest" });
+      await sleep(220);
+      moreButton.click();
+      return true;
+    }
+
+    const previousScrollTop = detailPane.scrollTop;
+    detailPane.scrollBy({
+      top: Math.max(260, detailPane.clientHeight * 0.72),
+      behavior: "smooth"
+    });
+    await sleep(420);
+
+    if (isAtScrollBottom(detailPane) || Math.abs(detailPane.scrollTop - previousScrollTop) < 2) {
+      const finalButton = findMoreInfoButton(detailPane);
+      if (finalButton) {
+        finalButton.scrollIntoView({ block: "center", inline: "nearest" });
+        await sleep(220);
+        finalButton.click();
+        return true;
+      }
+      return false;
+    }
+  }
+
+  return false;
+}
+
+function findDetailScrollPane() {
+  const anchor = document.querySelector(
+    ".job-detail-section, .job-sec-text, .sider-company, .job-detail, .job-detail-box, .job-detail-container, .job-detail-wrap, [class*='job-detail']"
+  );
+  if (!anchor) return null;
+
+  const ancestors = [];
+  let element = anchor;
+  while (element && element !== document.body && element !== document.documentElement) {
+    ancestors.push(element);
+    element = element.parentElement;
+  }
+
+  const ancestorPane = ancestors.find((candidate) => isScrollableY(candidate) && isMostlyRightSide(candidate));
+  if (ancestorPane) return ancestorPane;
+
+  const rightScrollablePanes = Array.from(document.querySelectorAll("div, main, section, article"))
+    .filter((candidate) => isScrollableY(candidate) && isMostlyRightSide(candidate))
+    .sort((a, b) => {
+      const aOverflow = a.scrollHeight - a.clientHeight;
+      const bOverflow = b.scrollHeight - b.clientHeight;
+      const aRect = a.getBoundingClientRect();
+      const bRect = b.getBoundingClientRect();
+      return bOverflow - aOverflow || bRect.left - aRect.left;
+    });
+
+  return rightScrollablePanes[0] || null;
+}
+
+function isScrollableY(element) {
+  if (!element) return false;
+  const style = window.getComputedStyle(element);
+  return /(auto|scroll|overlay)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 20;
+}
+
+function isMostlyRightSide(element) {
+  const rect = element.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  return rect.width > 260 && centerX > window.innerWidth * 0.42;
+}
+
+function findMoreInfoButton(root) {
+  const candidates = Array.from(root.querySelectorAll("a, button, div, span"))
+    .filter((element) => normalizeLine(element.innerText || element.textContent) === "查看更多信息");
+  return candidates.find(isClickableAndVisible) || null;
+}
+
+function isClickableAndVisible(element) {
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+  return rect.width > 0 &&
+    rect.height > 0 &&
+    style.display !== "none" &&
+    style.visibility !== "hidden" &&
+    Number(style.opacity) !== 0;
+}
+
+function isAtScrollBottom(element) {
+  return element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function collectJobInfo() {
   const jdText = getBossJobDescription();
@@ -192,24 +350,6 @@ function appendBusinessInfoValue(text, label, value) {
   return [...lines, label, normalizedValue].join("\n");
 }
 
-function getWorkAddress() {
-  const selectors = [
-    ".job-detail-section.job-detail-company .company-address .location-address",
-    ".job-detail-company .company-address .location-address",
-    ".company-address .location-address",
-    ".job-location .location-address"
-  ];
-
-  for (const selector of selectors) {
-    const element = document.querySelector(selector);
-    if (!element) continue;
-    const text = cleanJobDescription(getTextWithLineBreaks(element));
-    if (text) return text;
-  }
-
-  return "";
-}
-
 function parseBusinessInfoValue(text, label) {
   const lines = (text || "")
     .split("\n")
@@ -334,24 +474,4 @@ function dedupeAdjacent(lines) {
     if (line !== result[result.length - 1]) result.push(line);
   }
   return result;
-}
-
-function formatJobText(job) {
-  return [
-    `岗位：${job.title || ""}`,
-    `公司：${job.company || ""}`,
-    `薪资：${job.salary || ""}`,
-    `地点：${job.location || ""}`,
-    `URL：${job.url || ""}`,
-    `抓取时间：${job.capturedAt || ""}`,
-    "",
-    "======== 职位描述 ========",
-    job.description || "",
-    "",
-    "======== 公司介绍 ========",
-    job.companyIntro || "",
-    "",
-    "======== 工商信息 ========",
-    job.businessInfo || ""
-  ].join("\n");
 }
