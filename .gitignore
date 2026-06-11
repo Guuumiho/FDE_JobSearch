@@ -7,3 +7,5 @@ Thumbs.db
 .env.*
 node_modules/
 my_fde_joblooking/
+start_fde_local.cmd
+local_entry_notes.txt
