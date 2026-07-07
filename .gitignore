@@ -7,11 +7,18 @@ Thumbs.db
 .env.*
 node_modules/
 
+# Module privacy rules: only 01_jd_capture is uploadable
+02_resume_building/
+03_application_tracking/
+04_company_research/
+05_interview_simulation/
+
 # Local private workspace files
-my_fde_joblooking/
-resume-react-a4/
 .agents/
 .codex/
+my_fde_joblooking/
+resume-react-a4/
+01_jd_capture/local_only/
 start_fde_local.cmd
 local_entry_notes.txt
 CLAUDE.md
