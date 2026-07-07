@@ -6,6 +6,35 @@ Thumbs.db
 .env
 .env.*
 node_modules/
+
+# Local private workspace files
 my_fde_joblooking/
+resume-react-a4/
+.agents/
+.codex/
 start_fde_local.cmd
 local_entry_notes.txt
+CLAUDE.md
+photo_circle.png
+photo_source.png
+
+# Private job-search and resume materials
+resume*/
+resumes*/
+cv*/
+portfolio*/
+interviews*/
+jd_snapshots/
+project_portfolio/
+resume_versions/
+*_resume*
+*resume*
+*cv*
+*.doc
+*.docx
+*.pdf
+*.pages
+*.key
+*.ppt
+*.pptx
+*.xlsx
